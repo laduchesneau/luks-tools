@@ -1,15 +1,17 @@
 #!/bin/bash
 echoerr() { cat <<< "$@" 1>&2; }
 
+keyname=""
 # Ensure 'uuid' tool is installed
-if ! command -v uuid > /dev/null; then
-    echoerr "command 'uuid' not found"
-    exit 1
+if command -v uuid > /dev/null; then
+    keyname=`uuid`
+    
+else
+    read -p "Enter uniq identifier (UUID): " keyname
 fi
 
 # Ask for non-existing machine name
-echo -n "Identify this machine: "
-read machinename
+read -p "Identify this machine: " machinename
 if [[ -d "keys/$machinename" ]]; then
     echoerr "machine already exists"
     exit 2
@@ -17,7 +19,6 @@ fi
 
 # Create keyfile
 mkdir -p "keys/$machinename"
-keyname=`uuid`
 dd if=/dev/urandom bs=1 count=256 2>/dev/null > "keys/$machinename/$keyname.lek"
 
 # Create recovery key
