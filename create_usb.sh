@@ -23,13 +23,16 @@ select dev in $devs; do
         echoerr mkfs failed
         exit 4
     fi
-    mount /dev/${dev}1 /mnt 
+    tmpDir=$(base64 < /dev/urandom | tr -d 'O0Il1+/' | head -c 44; printf '\n')
+    mkdir /tmp/$tmpDir
+    mount /dev/${dev}1 /tmp/$tmpDir 
     if [ $? -ne 0 ]; then
         echoerr mount failed
         exit 5
     fi
-    find keys -type f -name "*.BEK" -exec echo {} \; -exec cp {} /mnt \;
-    find keys -type f -name "*.lek" -exec echo {} \; -exec cp {} /mnt \;
-    umount /mnt
+    find keys -type f -name "*.BEK" -exec echo {} \; -exec cp {} /tmp/$tmpDir \;
+    find keys -type f -name "*.lek" -exec echo {} \; -exec cp {} /tmp/$tmpDir \;
+    umount /tmp/$tmpDir
+    rm -rf /tmp/$tmpDir
     exit 0
 done

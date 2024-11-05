@@ -5,7 +5,6 @@ keyname=""
 # Ensure 'uuid' tool is installed
 if command -v uuid > /dev/null; then
     keyname=`uuid`
-    
 else
     read -p "Enter uniq identifier (UUID): " keyname
 fi
@@ -58,14 +57,13 @@ set -e
 if [ $CRYPTTAB_TRIED -eq "0" ]; then
     sleep 3
 fi
-if [ ! -e /mnt ]; then
-    mkdir -p /mnt
-fi
+tmpDir=$(base64 < /dev/urandom | tr -d 'O0Il1+/' | head -c 44; printf '\n')
+mkdir /tmp/$tmpDir
 for usbpartition in /dev/disk/by-id/usb-*-part1; do
     usbdevice=$(readlink -f $usbpartition)
-    if mount -t vfat $usbdevice /mnt 2>/dev/null; then
-        if [ -e /mnt/$CRYPTTAB_KEY.lek ]; then
-            cat /mnt/$CRYPTTAB_KEY.lek
+    if mount -t vfat $usbdevice /tmp/$tmpDir 2>/dev/null; then
+        if [ -e /tmp/$tmpDir/$CRYPTTAB_KEY.lek ]; then
+            cat /tmp/$tmpDir/$CRYPTTAB_KEY.lek
             umount $usbdevice
             exit
         fi
